@@ -40,7 +40,7 @@ To get the raw data:
 ```
 fetch https://pkg.freebsd.org/FreeBSD:12:amd64/latest/packagesite.txz
 unxz packagesite.txz
-tar -xf unxz packagesite.tar
+tar -xf packagesite.tar
 ```
 
 
