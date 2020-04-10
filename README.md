@@ -1,4 +1,4 @@
-THIS JUST IN, re 
+THIS JUST IN, re https://twitter.com/DLangille/status/1248635433275330560
 
 Combined suggestions from Fosstodon & from bsd.network:
 
