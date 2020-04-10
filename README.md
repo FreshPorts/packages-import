@@ -1,3 +1,30 @@
+THIS JUST IN, re 
+
+Combined suggestions from Fosstodon & from bsd.network:
+
+```
+$ time jq -rc '[1, .origin, .name, .version] | 
+@tsv
+' < ~/tmp/FreeBSD\:12\:amd64/latest/packagesite.yaml > packagesite.csv
+
+real0m1.351s
+user0m1.295s
+sys0m0.055s
+
+$ time ./import-via-copy-packagesite.py
+
+real0m1.731s
+user0m0.131s
+sys0m0.008s
+
+The data get in there fast enough.
+```
+
+Next step, go from that raw data into normalized form.  That should be easier & faster now that it's in a [#PostgreSQL] database [on #FreeBSD].
+
+Thank you.
+
+
 proof-of-concept for importing packagesite.yaml into FreshPorts.  The steps are:
 
 1. From each line of 32500-line yaml file, extract 3 fields creating a csv file
