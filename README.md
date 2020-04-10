@@ -1,10 +1,22 @@
+proof-of-concept for importing packagesite.yaml into FreshPorts.  The steps are:
+
+1. From each line of 32500-line yaml file, extract 3 fields creating a csv file
+1. load cvs file into db
+
+Step 2 takes seconds.
+
+I need help / advice with step 1 which takes 3 minutes.
+
+
 Let's import packge information from a FreeBSD repo's packagesite.yaml file:
 
 To get the raw data:
 
+```
 fetch https://pkg.freebsd.org/FreeBSD:12:amd64/latest/packagesite.txz
 unxz packagesite.txz
 tar -xf unxz packagesite.tar
+```
 
 
 packagesite-convert-to-csv - takes data from STDIN and writes to a file in
