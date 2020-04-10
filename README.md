@@ -3,9 +3,7 @@ THIS JUST IN, re https://twitter.com/DLangille/status/1248635433275330560
 Combined suggestions from Fosstodon & from bsd.network:
 
 ```
-$ time jq -rc '[1, .origin, .name, .version] | 
-@tsv
-' < ~/tmp/FreeBSD\:12\:amd64/latest/packagesite.yaml > packagesite.csv
+$ time jq -rc '[1, .origin, .name, .version] | @tsv' < ~/tmp/FreeBSD\:12\:amd64/latest/packagesite.yaml > packagesite.csv
 
 real0m1.351s
 user0m1.295s
