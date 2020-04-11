@@ -6,13 +6,12 @@ import io
 import sys
 import psycopg2
 import psycopg2.extras
-import csv
 
 from psycopg2.extensions import adapt
 
 import configparser # for config.ini parsing
 
-ABI = 'FreeBSD:13:aarch64'
+ABI = 'FreeBSD:12:amd64'
 
 
 config = configparser.ConfigParser()
@@ -27,24 +26,22 @@ curs = dbh.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 
 curs.execute("select freshports_branch_set('head')")
-curs.execute("SELECT ABIGetID('%s') AS abi_id" % (ABI))
-row = curs.fetchone()
-dbh.close();
 
-ABI_id = row['abi_id'];
-
-with open('csv', 'w', newline='') as csvfile:
-    csv_out = csv.writer(csvfile, delimiter='\t', quoting=csv.QUOTE_MINIMAL)
-
-
-    line = sys.stdin.readline()
-    while line:
-        docs = yaml.load_all(line, Loader=yaml.FullLoader)
-        try:
-            for doc in docs:
-                csv_out.writerow( [ ABI_id, doc['origin'], doc['name'], doc['version'] ] )
+line = sys.stdin.readline()
+while line:
+    docs = yaml.load_all(line, Loader=yaml.FullLoader)
+    try:
+        for doc in docs:
+#            print(doc['origin'], doc['name'], doc['version'])
+#            print(curs.mogrify("INSERT INTO test (num, data) VALUES (%s, %s)", (42, 'bar')))
+#            print(curs.morgify("PackageAdd(%s, %s, %s, %s)", ( ABI, doc['origin'], doc['name'], doc['version'] ) ) )
+            curs.execute("SELECT PackageAdd('%s', '%s', '%s', '%s')" % ( ABI, doc['origin'], doc['name'], doc['version']))
             
-                line = sys.stdin.readline()
-        except:
-            print('exception')
             line = sys.stdin.readline()
+    except:
+        print('exception')
+        line = sys.stdin.readline()
+
+
+dbh.commit();
+dbh.close();
