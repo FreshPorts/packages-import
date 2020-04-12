@@ -1,14 +1,27 @@
-2020-04-12
+# 2020-04-12
 
 Current status - we have hover text for each repo/ABI combination.
 
-#check_repos_for_new_stuff.py#
+## check_repos_for_new_stuff.py
+
+* Checks each ABI (both latest and quarterly) for new repos
+* Pull data from `GetReposToReview()` in database
+* updates the `repo_date` column of the `packages_last_checked` table
 
 
+## get_packagesite.txz_date
 
+* shell script to grab last modified date of `packagesite.txz` from web page
+* does not get the actual last modified from headers, parses web page
+* see http://pkg.freebsd.org/FreeBSD:12:aarch64/ for example
+* could be modified to use HEAD and get the actual value from the file
 
+## import-raw-abi.sh
 
+* shell script to extract values from `packagesite.txz` and convert to tab delimited file
+* invokes `import-via-copy-packagesite-all-raw-fields.py` to populate the `packages_raw` table
 
+# Older stuff
 
 Some stuff from 2020-04-11 and before
 
