@@ -38,15 +38,15 @@ if (NumRows > 0):
     command = "/usr/home/dan/src/packages-import/get_packagesite.txz_date " + row['abi_name'] + " " + row['branch']
     timestamp = os.popen(command).readlines()
     if timestamp == []:
-      date_last_checked = None
+      repo_date = None
     else:
-      date_last_checked = timestamp[0].strip()
+      repo_date = timestamp[0].strip()
 
-    print(date_last_checked)
+    print(repo_date)
       
     # now we update the last_checked and repo_date in the packages_last_checked table
     # PackagesLastCheckedSetRepoDate(a_abi_name text, a_branch_name text, a_CheckedDate text)    
-    cursUpdate.callproc('PackagesLastCheckedSetRepoDate', (row['abi_name'],row['branch'], date_last_checked))
+    cursUpdate.callproc('PackagesLastCheckedSetRepoDate', (row['abi_name'],row['branch'], repo_date))
 
 dbh.commit();
 dbh.close();
