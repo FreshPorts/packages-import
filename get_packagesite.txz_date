@@ -1,0 +1,11 @@
+#!/bin/sh
+
+ABI=$1
+BRANCH=$2
+
+openssl s_client -ign_eof pkg.freebsd.org:443 <<EOF 2>&1 | awk -F '="|"[> ]|</[^>]*>' -v file="packagesite.txz" 'sub(/.*title="/,"")&&$1==file{print $(NF-2)}'
+GET /$ABI/$BRANCH/ HTTP/1.1
+Host: $( hostname )
+Connection: close
+
+EOF
