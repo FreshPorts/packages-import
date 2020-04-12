@@ -50,7 +50,7 @@ def main(argv):
 
 
    with open(inputfile, 'r') as f:
-      curs.copy_from(f, 'packages_raw_alt', sep = '\t', columns = ['abi', 'branch', 'package_origin', 'package_name', 'package_version'] )
+      curs.copy_from(f, 'packages_raw', sep = '\t', columns = ['abi', 'branch', 'package_origin', 'package_name', 'package_version'] )
 
    dbh.commit()
    dbh.close();
