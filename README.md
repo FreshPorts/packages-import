@@ -1,3 +1,17 @@
+2020-04-12
+
+Current status - we have hover text for each repo/ABI combination.
+
+#check_repos_for_new_stuff.py#
+
+
+
+
+
+
+
+Some stuff from 2020-04-11 and before
+
 THIS JUST IN, re https://twitter.com/DLangille/status/1248635433275330560
 
 Combined suggestions from Fosstodon & from bsd.network:
