@@ -17,23 +17,23 @@ def main(argv):
    try:
       opts, args = getopt.getopt(argv,"hi:o:",["ifile=","ofile="])
    except getopt.GetoptError:
-      print ('test.py -i <inputfile> -o <outputfile>')
+#      print ('test.py -i <inputfile> -o <outputfile>')
       sys.exit(2)
    for opt, arg in opts:
-      print(opt)
+#      print(opt)
       if opt == '-h':
          print ('import-via-copy-packagesite.py -i <inputfile>')
          sys.exit()
       elif opt in ("-i", "--ifile"):
          inputfile = arg
-         print("my input file is {}".format(inputfile))
+#         print("my input file is {}".format(inputfile))
    
-   print("my input file is {}".format(inputfile))
+#   print("my input file is {}".format(inputfile))
 
 
 
 
-   print("inputfile='%s'" % (inputfile))
+#   print("inputfile='%s'" % (inputfile))
 
    config = configparser.ConfigParser()
    config.read('/usr/local/etc/freshports/config.ini')
