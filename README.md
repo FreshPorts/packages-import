@@ -5,16 +5,41 @@ Current status - we have hover text for each repo/ABI combination.
 ## check_repos_for_new_stuff.py
 
 * Checks each ABI (both latest and quarterly) for new repos
+* invokes `get_packagesite.txz_date`
 * Pull data from `GetReposToReview()` in database
 * updates the `repo_date` column of the `packages_last_checked` table
+* runs in about 3 seconds
 
 
 ## get_packagesite.txz_date
 
+* invoked by `check_repos_for_new_stuff.py`
 * shell script to grab last modified date of `packagesite.txz` from web page
 * does not get the actual last modified from headers, parses web page
 * see http://pkg.freebsd.org/FreeBSD:12:aarch64/ for example
 * could be modified to use HEAD and get the actual value from the file
+
+
+## import_packagesite.py
+
+* imports some data from `packagesite.yaml`
+* gets list of ABI/package-set values from `PackagesGetReposNeedingUpdates()`
+* invokes `fetch-extract-parse-import-one-abi.sh` to do the import
+* calls `PackagesLastCheckedSetImportDate()` to mark the import as completed
+
+## fetch-extract-parse-import-one-abi.sh
+
+* invoked by `import_packagesite.py`
+* fetches `packagesite.txz`
+* extracts `origin`, `name`, `version` into a TSV file: `packagesite.tsv`
+* invokes `import-via-copy-packagesite-all-raw-fields.py` to populate the `packages_raw` table
+
+## import-via-copy-packagesite-all-raw-fields.py
+
+* invoked by `fetch-extract-parse-import-one-abi.sh`
+* connects to database and uses `COPY` to load `packagesite.tsv` into the `packages_raw` table
+
+# now deprecated
 
 ## import-raw-abi.sh
 
