@@ -8,8 +8,8 @@ Current status - we have hover text for each repo/ABI combination.
 * invokes `get_packagesite.txz_date`
 * Pull data from `GetReposToReview()` in database
 * updates the `repo_date` column of the `packages_last_checked` table
-* runs in about 3 seconds
 * usually invoked via `./check_repos_for_new_stuff.py`
+* runs in about 3 seconds when checking all 15 repos
 
 
 ## get_packagesite.txz_date
@@ -28,6 +28,7 @@ Current status - we have hover text for each repo/ABI combination.
 * invokes `fetch-extract-parse-import-one-abi.sh` to do the import
 * calls `PackagesLastCheckedSetImportDate()` to mark the import as completed
 * usually invoked via `echo /usr/home/dan/src/packages-import/import_packagesite.py | sudo su -l freshports`
+* runs in about 70 seconds importing 15 repos
 
 
 ## fetch-extract-parse-import-one-abi.sh
