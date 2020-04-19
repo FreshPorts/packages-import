@@ -1,7 +1,7 @@
 #!/bin/sh
 
 abi=$1
-branch=$2
+package_set=$2
 LOGGER='logger -t freshports -p local3.info '
 
 $LOGGER echo got into $0
@@ -11,7 +11,7 @@ $LOGGER echo got into $0
 $LOGGER starting $0
 
 # we just try to create every time
-mkdir -p $BASEDIR_PACKAGER/$ABI/$BRANCH
+mkdir -p $BASEDIR_PACKAGER/$abi/$package_set
 
 if [ ! -d $BASEDIR_PACKAGER ]
 then
@@ -19,20 +19,20 @@ then
   exit 1
 fi
 
-if [ ! -d $BASEDIR_PACKAGER/$abi/$branch ]
+if [ ! -d $BASEDIR_PACKAGER/$abi/$package_set ]
 then
-  mkdir -p $BASEDIR_PACKAGER/$abi/$branch
+  mkdir -p $BASEDIR_PACKAGER/$abi/$package_set
   if [ $? -ne 0 ]
   then
-    $LOGGER "FATAL error: unable to create $BASEDIR_PACKAGER/$abi/$branch - $0 terminating"
+    $LOGGER "FATAL error: unable to create $BASEDIR_PACKAGER/$abi/$package_set - $0 terminating"
     exit 1
   fi  
 fi
 
-cd $BASEDIR_PACKAGER/$abi/$branch/
+cd $BASEDIR_PACKAGER/$abi/$package_set/
 if [ $? -ne 0 ]
 then
-  $LOGGER "FATAL error: unable to cd $BASEDIR_PACKAGER/$abi/$branch - $0 terminating"
+  $LOGGER "FATAL error: unable to cd $BASEDIR_PACKAGER/$abi/$package_set - $0 terminating"
     exit 1
 fi
 
@@ -43,10 +43,10 @@ then
   exit 1
 fi  
 
-fetch https://pkg.freebsd.org/$abi/$branch/packagesite.txz
+fetch https://pkg.freebsd.org/$abi/$package_set/packagesite.txz
 if [ $? -ne 0 ]
 then
-  $LOGGER "FATAL error: unable to fetch https://pkg.freebsd.org/$abi/$branch/packagesite.txz - $0 terminating"
+  $LOGGER "FATAL error: unable to fetch https://pkg.freebsd.org/$abi/$package_set/packagesite.txz - $0 terminating"
   exit 1
 fi
 
@@ -65,7 +65,7 @@ then
 fi
 
 
-jq -rc --arg ABI "$abi" --arg BRANCH "$branch" '[$ABI, $BRANCH, .origin, .name, .version] | @tsv' < packagesite.yaml > packagesite.tsv
+jq -rc --arg ABI "$abi" --arg PACKAGE_SET "$package_set" '[$ABI, $PACKAGE_SET, .origin, .name, .version] | @tsv' < packagesite.yaml > packagesite.tsv
 if [ $? -ne 0 ]
 then
   $LOGGER "FATAL error: unable to run jq to get the tsv file - $0 terminating"
@@ -79,7 +79,7 @@ then
   exit 1
 fi
 
-$LOGGER "finished importing $ABI/$BRANCH"
+$LOGGER "finished importing $abi/$package_set"
 
 echo Done
 
