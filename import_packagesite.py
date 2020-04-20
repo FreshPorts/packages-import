@@ -30,18 +30,24 @@ curs = dbh.cursor(cursor_factory=psycopg2.extras.DictCursor)
 # for updating the rows
 cursUpdate = dbh.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-# what needs to be updated?
-curs.execute('select * from PackagesGetReposNeedingUpdates() ORDER BY abi_name, branch')
+#curs.execute('select * from PackagesGetReposNeedingUpdates() ORDER BY abi_name, package_set')
+curs.callproc('PackagesGetReposNeedingUpdates')
 NumRows = curs.rowcount
 dbh.commit();
 if (NumRows > 0):
   print("we have " + str(NumRows) + " to process");
   rows = curs.fetchall()
   for row in rows:
-    print(row['abi_name'] + '/' + row['branch']);
+    abi_name    = row['abi_name']
+    package_set = row['package_set']
+    print(abi_name + '/' + package_set);
+
+    # First, we delete any existing values for this ABI/set combintation. We don't want duplicates on the import
+    cursUpdate.callproc('PackagesRawDeleteForABIPackageSet', (abi_name, package_set))
 
     # the script name needs a space before the first parameter
-    command = "/usr/home/dan/src/packages-import/fetch-extract-parse-import-one-abi.sh " + row['abi_name'] + " " + row['branch']
+    # when importing, this script will do a commit if it succeeds.
+    command = "/usr/home/dan/src/packages-import/fetch-extract-parse-import-one-abi.sh " + abi_name + " " + package_set
     
     print("command is: " + command);
     result = os.popen(command).readlines()
@@ -50,13 +56,14 @@ if (NumRows > 0):
     print(result)
     if result != [] and result[0].strip() == 'Done':
       # now we update the last_checked and repo_date in the packages_last_checked table
-      # PackagesLastCheckedSetRepoDate(a_abi_name text, a_branch_name text, a_CheckedDate text)    
-      cursUpdate.callproc('PackagesLastCheckedSetImportDate', (row['abi_name'], row['branch']))
+      cursUpdate.callproc('PackagesLastCheckedSetImportDate', (abi_name, package_set))
       dbh.commit();
-#      sys.exit("that went well!")
     else:
        pprint(result)
        sys.exit("something went wrong with the os.popen")
+
+    # safe thing to do here
+    dbh.rollback();
 
 dbh.rollback();
 dbh.close();
