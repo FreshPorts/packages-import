@@ -4,6 +4,8 @@ abi=$1
 package_set=$2
 LOGGER='logger -t freshports -p local3.info '
 
+JQ=/usr/local/bin/jq
+
 $LOGGER echo got into $0
 
 . /usr/local/etc/freshports/config.sh
@@ -65,14 +67,14 @@ then
 fi
 
 
-jq -rc --arg ABI "$abi" --arg PACKAGE_SET "$package_set" '[$ABI, $PACKAGE_SET, .origin, .name, .version] | @tsv' < packagesite.yaml > packagesite.tsv
+$JQ -rc --arg ABI "$abi" --arg PACKAGE_SET "$package_set" '[$ABI, $PACKAGE_SET, .origin, .name, .version] | @tsv' < packagesite.yaml > packagesite.tsv
 if [ $? -ne 0 ]
 then
   $LOGGER "FATAL error: unable to run jq to get the tsv file - $0 terminating"
   exit 1
 fi
 
-/usr/home/dan/src/packages-import/import-via-copy-packagesite-all-raw-fields.py -i packagesite.tsv
+$SCRIPTDIR/import-via-copy-packagesite-all-raw-fields.py -i packagesite.tsv
 if [ $? -ne 0 ]
 then
   $LOGGER "FATAL error: unable to run import-via-copy-packagesite.py to import the file - $0 terminating"

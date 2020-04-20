@@ -16,6 +16,7 @@ import configparser # for config.ini parsing
 config = configparser.ConfigParser()
 config.read('/usr/local/etc/freshports/config.ini')
 
+SCRIPT_DIR = config['filesystem']['SCRIPT_DIR']
 
 DSN = 'host=' + config['database']['HOST'] + ' dbname=' + config['database']['DBNAME'] + ' user=' + config['database']['PACKAGER_DBUSER'] + ' password=' + re.escape(config['database']['PACKAGER_PASSWORD'])
 
@@ -35,7 +36,7 @@ if (NumRows > 0):
   for row in rows:
     print(row['abi_name'] + '/' + row['branch']);
 
-    command = "/usr/home/dan/src/packages-import/get_packagesite.txz_date " + row['abi_name'] + " " + row['branch']
+    command = SCRIPT_DIR + "/get_packagesite.txz_date " + row['abi_name'] + " " + row['branch']
     timestamp = os.popen(command).readlines()
     if timestamp == []:
       repo_date = None

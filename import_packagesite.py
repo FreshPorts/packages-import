@@ -19,6 +19,7 @@ import configparser # for config.ini parsing
 config = configparser.ConfigParser()
 config.read('/usr/local/etc/freshports/config.ini')
 
+SCRIPT_DIR = config['filesystem']['SCRIPT_DIR']
 
 DSN = 'host=' + config['database']['HOST'] + ' dbname=' + config['database']['DBNAME'] + ' user=' + config['database']['PACKAGER_DBUSER'] + ' password=' + re.escape(config['database']['PACKAGER_PASSWORD'])
 
@@ -47,7 +48,7 @@ if (NumRows > 0):
 
     # the script name needs a space before the first parameter
     # when importing, this script will do a commit if it succeeds.
-    command = "/usr/home/dan/src/packages-import/fetch-extract-parse-import-one-abi.sh " + abi_name + " " + package_set
+    command = SCRIPT_DIR + "fetch-extract-parse-import-one-abi.sh " + abi_name + " " + package_set
     
     print("command is: " + command);
     result = os.popen(command).readlines()
