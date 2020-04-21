@@ -34,9 +34,9 @@ dbh.commit();
 if (NumRows > 0):
   rows = curs.fetchall()
   for row in rows:
-    print(row['abi_name'] + '/' + row['branch']);
+    print(row['abi_name'] + '/' + row['package_set']);
 
-    command = SCRIPT_DIR + "/get_packagesite.txz_date " + row['abi_name'] + " " + row['branch']
+    command = SCRIPT_DIR + "/get_packagesite.txz_date " + row['abi_name'] + " " + row['package_set']
     timestamp = os.popen(command).readlines()
     if timestamp == []:
       repo_date = None
@@ -46,8 +46,8 @@ if (NumRows > 0):
     print(repo_date)
       
     # now we update the last_checked and repo_date in the packages_last_checked table
-    # PackagesLastCheckedSetRepoDate(a_abi_name text, a_branch_name text, a_CheckedDate text)    
-    cursUpdate.callproc('PackagesLastCheckedSetRepoDate', (row['abi_name'],row['branch'], repo_date))
+    # PackagesLastCheckedSetRepoDate(a_abi_name text, a_package_set text, a_CheckedDate text)    
+    cursUpdate.callproc('PackagesLastCheckedSetRepoDate', (row['abi_name'],row['package_set'], repo_date))
 
 dbh.commit();
 dbh.close();
