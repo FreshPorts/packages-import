@@ -27,7 +27,7 @@ Current status - we have hover text for each repo/ABI combination.
 * gets list of ABI/package-set values from `PackagesGetReposNeedingUpdates()`
 * invokes `fetch-extract-parse-import-one-abi.sh` to do the import
 * calls `PackagesLastCheckedSetImportDate()` to mark the import as completed
-* usually invoked via `echo /usr/home/dan/src/packages-import/import_packagesite.py | sudo su -l freshports`
+* usually invoked via `echo /usr/local/libexec/freshports/import_packagesite.py | sudo su -l freshports`
 * runs in about 70 seconds importing 15 repos
 
 
