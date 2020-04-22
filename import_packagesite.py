@@ -48,7 +48,7 @@ if (NumRows > 0):
 
     # the script name needs a space before the first parameter
     # when importing, this script will do a commit if it succeeds.
-    command = SCRIPT_DIR + "fetch-extract-parse-import-one-abi.sh " + abi_name + " " + package_set
+    command = SCRIPT_DIR + "/fetch-extract-parse-import-one-abi.sh " + abi_name + " " + package_set
     
     print("command is: " + command);
     result = os.popen(command).readlines()
