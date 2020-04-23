@@ -35,7 +35,12 @@ if (NumRows > 0):
   for row in rows:
     print(row['abi_name'] + '/' + row['package_set']);
 
+    cursUpdate.execute("BEGIN");
     cursUpdate.callproc('UpdatePackagesFromRawPackages', (row['abi_name'],row['package_set']))
+    # I'm not sure how to properly check the return value so,
+    # be sure to terminate this transaction one way or another
+    cursUpdate.execute("COMMIT");
+    cursUpdate.execute("ROLLBACK");
 
-cursUpdate.execute("COMMIT");
+cursUpdate.execute("ROLLBACK");
 dbh.close();
