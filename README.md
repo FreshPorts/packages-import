@@ -43,6 +43,14 @@ Current status - we have hover text for each repo/ABI combination.
 * invoked by `fetch-extract-parse-import-one-abi.sh`
 * connects to database and uses `COPY` to load `packagesite.tsv` into the `packages_raw` table
 
+## UpdatePackagesFromRawPackages.py
+
+* invokes `PackagesGetImportedReposNeedingProcessing()` to get a list of
+  repos which need to be refreshed from `packages_raw` table into `packages`
+  table.
+* invokes `UpdatePackagesFromRawPackages()` for each abi/package_set
+  combintation
+
 # now deprecated
 
 ## import-raw-abi.sh
