@@ -31,8 +31,7 @@ curs = dbh.cursor(cursor_factory=psycopg2.extras.DictCursor)
 # for updating the rows
 cursUpdate = dbh.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-#curs.execute('select * from PackagesGetReposNeedingUpdates() ORDER BY abi_name, package_set')
-curs.callproc('PackagesGetReposNeedingUpdates')
+curs.callproc('PackagesGetReposNeedingImports')
 NumRows = curs.rowcount
 dbh.commit();
 if (NumRows > 0):

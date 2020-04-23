@@ -28,7 +28,7 @@ curs = dbh.cursor(cursor_factory=psycopg2.extras.DictCursor)
 cursUpdate = dbh.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 
-curs.execute("SELECT * from PackagesGetReposNeedingImports()")
+curs.execute("SELECT * from PackagesGetImportedReposNeedingProcessing()")
 NumRows = curs.rowcount
 if (NumRows > 0):
   rows = curs.fetchall()
