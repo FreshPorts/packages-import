@@ -50,7 +50,7 @@ Current status - we have hover text for each repo/ABI combination.
   table.
 * invokes `UpdatePackagesFromRawPackages()` for each abi/package_set
   combintation
-* usually invoked via echo /usr/local/libexec/freshports/UpdatePackagesFromRawPackages.py | sudo su -l freshports
+* usually invoked via `echo /usr/local/libexec/freshports/UpdatePackagesFromRawPackages.py | sudo su -l freshports`
 
 # now deprecated
 
