@@ -2,6 +2,13 @@
 
 Current status - we have hover text for each repo/ABI combination.
 
+# The scripts
+There are three main scripts:
+
+1. check the repos for new stuff to import
+2. import the new stuff
+3. update the `packages` table based on the newly imported stuff
+
 ## check_repos_for_new_stuff.py
 
 * Checks each ABI (both latest and quarterly) for new repos
@@ -12,7 +19,7 @@ Current status - we have hover text for each repo/ABI combination.
 * runs in about 3 seconds when checking all 15 repos
 
 
-### get_packagesite.txz_date
+#### get_packagesite.txz_date
 
 * invoked by `check_repos_for_new_stuff.py`
 * shell script to grab last modified date of `packagesite.txz` from web page
@@ -31,14 +38,14 @@ Current status - we have hover text for each repo/ABI combination.
 * runs in about 70 seconds importing 15 repos
 
 
-### fetch-extract-parse-import-one-abi.sh
+#### fetch-extract-parse-import-one-abi.sh
 
 * invoked by `import_packagesite.py`
 * fetches `packagesite.txz`
 * extracts `origin`, `name`, `version` into a TSV file: `packagesite.tsv`
 * invokes `import-via-copy-packagesite-all-raw-fields.py` to populate the `packages_raw` table
 
-### import-via-copy-packagesite-all-raw-fields.py
+#### import-via-copy-packagesite-all-raw-fields.py
 
 * invoked by `fetch-extract-parse-import-one-abi.sh`
 * connects to database and uses `COPY` to load `packagesite.tsv` into the `packages_raw` table
