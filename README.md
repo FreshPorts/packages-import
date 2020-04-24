@@ -8,7 +8,7 @@ Current status - we have hover text for each repo/ABI combination.
 * invokes `get_packagesite.txz_date`
 * Pull data from `GetReposToReview()` in database
 * updates the `repo_date` column of the `packages_last_checked` table
-* usually invoked via `./check_repos_for_new_stuff.py`
+* usually invoked via `echo /usr/local/libexec/freshports/check_repos_for_new_stuff.py | sudo su -l freshports`
 * runs in about 3 seconds when checking all 15 repos
 
 
