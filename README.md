@@ -19,7 +19,7 @@ There are three main scripts:
 * runs in about 3 seconds when checking all 15 repos
 
 
-#### get_packagesite.txz_date
+##### get_packagesite.txz_date
 
 * invoked by `check_repos_for_new_stuff.py`
 * shell script to grab last modified date of `packagesite.txz` from web page
@@ -38,14 +38,14 @@ There are three main scripts:
 * runs in about 70 seconds importing 15 repos
 
 
-#### fetch-extract-parse-import-one-abi.sh
+##### fetch-extract-parse-import-one-abi.sh
 
 * invoked by `import_packagesite.py`
 * fetches `packagesite.txz`
 * extracts `origin`, `name`, `version` into a TSV file: `packagesite.tsv`
 * invokes `import-via-copy-packagesite-all-raw-fields.py` to populate the `packages_raw` table
 
-#### import-via-copy-packagesite-all-raw-fields.py
+##### import-via-copy-packagesite-all-raw-fields.py
 
 * invoked by `fetch-extract-parse-import-one-abi.sh`
 * connects to database and uses `COPY` to load `packagesite.tsv` into the `packages_raw` table
