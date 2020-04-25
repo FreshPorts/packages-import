@@ -11,7 +11,12 @@ import psycopg2.extras
 
 #from psycopg2.extensions import adapt
 
+import syslog             # for logging
+
 import configparser # for config.ini parsing
+
+syslog.openlog(ident=__file__., facility=syslog.LOG_LOCAL3)
+syslog.syslog(syslog.LOG_NOTICE, 'Starting up')
 
 config = configparser.ConfigParser()
 config.read('/usr/local/etc/freshports/config.ini')
@@ -33,7 +38,7 @@ NumRows = curs.rowcount
 if (NumRows > 0):
   rows = curs.fetchall()
   for row in rows:
-    print(row['abi_name'] + '/' + row['package_set']);
+    syslog.syslog(syslog.LOG_NOTICE, 'checking ' + row['abi_name'] + '/' + row['package_set']);
 
     cursUpdate.execute("BEGIN");
     cursUpdate.callproc('UpdatePackagesFromRawPackages', (row['abi_name'],row['package_set']))
@@ -44,3 +49,5 @@ if (NumRows > 0):
 
 cursUpdate.execute("ROLLBACK");
 dbh.close();
+
+syslog.syslog(syslog.LOG_NOTICE, 'Finishing')
