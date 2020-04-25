@@ -17,7 +17,6 @@ from psycopg2.extensions import adapt
 import configparser # for config.ini parsing
 
 syslog.openlog(ident=__file__., facility=syslog.LOG_LOCAL3)
-
 syslog.syslog(syslog.LOG_NOTICE, 'Starting up')
 
 config = configparser.ConfigParser()
