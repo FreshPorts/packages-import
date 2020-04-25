@@ -16,7 +16,7 @@ from psycopg2.extensions import adapt
 
 import configparser # for config.ini parsing
 
-syslog.openlog(ident=__file__., facility=syslog.LOG_LOCAL3)
+syslog.openlog(ident=os.path.basename(__file__), facility=syslog.LOG_LOCAL3)
 syslog.syslog(syslog.LOG_NOTICE, 'Starting up')
 
 config = configparser.ConfigParser()
@@ -52,23 +52,23 @@ if (NumRows > 0):
     else:
       repo_date = timestamp[0].strip()
 
-    syslog.syslog(syslog.LOG_NOTICE, 'checking: ' + row['abi_name'] + '/' + row['package_set'] + ' : ' + repo_date)
+    syslog.syslog(syslog.LOG_NOTICE, 'checking: ' + row['abi_name'] + '/' + row['package_set'] + ' : ' + str(repo_date or ""))
       
     # now we update the last_checked and repo_date in the packages_last_checked table
     # PackagesLastCheckedSetRepoDate(a_abi_name text, a_package_set text, a_CheckedDate text)    
     cursUpdate.callproc('PackagesLastCheckedSetRepoDate', (row['abi_name'],row['package_set'], repo_date))
-    retval = cur.fetchone()[0]
+    retval = cursUpdate.fetchone()[0]
     if retval == 1:
       ReposNeedImporting.append(row['abi_name'] + '/' + row['package_set'] + ' : ' + repo_date)
 
 dbh.commit();
 dbh.close();
 
-if length(ReposNeedImporting) > 0:
+if len(ReposNeedImporting) > 0:
   # set the flag for job-waiting.pl
   Path(SIGNAL_NEW_REPO)
   syslog.syslog(syslog.LOG_NOTICE, 'There are ' + ReposNeedImporting.length() + ' which need importing ' + str(ReposNeedImporting))
 else:
-  syslog.syslog(syslog.LOG_NOTICE, No )
+  syslog.syslog(syslog.LOG_NOTICE, 'No repos need importing')
 
 syslog.syslog(syslog.LOG_NOTICE, 'finishes');
