@@ -45,7 +45,7 @@ then
   exit 1
 fi  
 
-fetch https://pkg.freebsd.org/$abi/$package_set/packagesite.txz
+fetch --quiet https://pkg.freebsd.org/$abi/$package_set/packagesite.txz
 if [ $? -ne 0 ]
 then
   $LOGGER "FATAL error: unable to fetch https://pkg.freebsd.org/$abi/$package_set/packagesite.txz - $0 terminating"
