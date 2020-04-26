@@ -32,8 +32,7 @@ PKG_SITE_DIR = config['filesystem']['PACKAGE_IMPORT_DIR']
 SIGNAL_NEW_REPO_READY_FOR_IMPORT = config['filesystem']['SIGNAL_NEW_REPO_READY_FOR_IMPORT']
 
 # the flags we will set
-SIGNAL_NEW_REPO_IMPORTED         = config['filesystem']['SIGNAL_NEW_REPO_IMPORTED']
-SIGNAL_JOB_WAITING               = config['filesystem']['SIGNAL_JOB_WAITING']
+SIGNAL_NEW_REPO_IMPORTED = config['filesystem']['SIGNAL_NEW_REPO_IMPORTED']
 
 dbh = psycopg2.connect(DSN)
 curs = dbh.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -85,7 +84,6 @@ if NumRows > 0:
   # set the flag for job-waiting.pl
   Path(SIGNAL_NEW_REPO_READY_FOR_IMPORT).unlink()
   Path(SIGNAL_NEW_REPO_IMPORTED).touch()
-  Path(SIGNAL_JOB_WAITING).touch()
   syslog.syslog(syslog.LOG_NOTICE, 'There are ' + str(len(ReposNeedImporting)) + ' repos which need post-import processing: ' + str(ReposNeedImporting))
 else:
   syslog.syslog(syslog.LOG_NOTICE, 'No repos need importing. How did this happen? This should never happen.')
