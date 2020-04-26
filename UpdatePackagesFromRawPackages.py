@@ -1,19 +1,20 @@
 #!/usr/local/bin/python
 
-import re    # for escaping the database passwords
-#import yaml
-#import io
-#import sys
+# Update the packages_raw table with port_id and abi_id
+# Then update the packages tables from packages_raw
+
 import psycopg2
 import psycopg2.extras
-
-#import os
-
-#from psycopg2.extensions import adapt
-
-import syslog             # for logging
-
 import configparser # for config.ini parsing
+import re           # for escaping the database passwords
+import syslog       # for logging
+
+from pathlib import Path  # for touching the signal file
+
+import os
+
+
+
 
 syslog.openlog(ident=os.path.basename(__file__), facility=syslog.LOG_LOCAL3)
 syslog.syslog(syslog.LOG_NOTICE, 'Starting up')
@@ -25,6 +26,8 @@ SCRIPT_DIR = config['filesystem']['SCRIPT_DIR']
 
 DSN = 'host=' + config['database']['HOST'] + ' dbname=' + config['database']['DBNAME'] + ' user=' + config['database']['PACKAGER_DBUSER'] + ' password=' + re.escape(config['database']['PACKAGER_PASSWORD'])
 
+# the flag we will remove
+SIGNAL_NEW_REPO_IMPORTED = config['filesystem']['SIGNAL_NEW_REPO_IMPORTED']
 
 dbh = psycopg2.connect(DSN)
 curs = dbh.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -38,7 +41,7 @@ NumRows = curs.rowcount
 if (NumRows > 0):
   rows = curs.fetchall()
   for row in rows:
-    syslog.syslog(syslog.LOG_NOTICE, 'checking ' + row['abi_name'] + '/' + row['package_set']);
+    syslog.syslog(syslog.LOG_NOTICE, 'updating packages table for ' + row['abi_name'] + '/' + row['package_set']);
 
     cursUpdate.execute("BEGIN");
     cursUpdate.callproc('UpdatePackagesFromRawPackages', (row['abi_name'],row['package_set']))
@@ -49,5 +52,13 @@ if (NumRows > 0):
 
 cursUpdate.execute("ROLLBACK");
 dbh.close();
+
+
+if NumRows > 0:
+  # set the flag for job-waiting.pl
+  Path(SIGNAL_NEW_REPO_IMPORTED).unlink()
+  syslog.syslog(syslog.LOG_NOTICE, 'There were ' + NumRows + ' repos updated in packages.')
+else:
+  syslog.syslog(syslog.LOG_NOTICE, 'There were no packages to update.  I should never be called like this.  It is such an inconvenience. Have you no shame?')
 
 syslog.syslog(syslog.LOG_NOTICE, 'Finishing')

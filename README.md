@@ -16,6 +16,7 @@ There are three main scripts:
 * Pull data from `GetReposToReview()` in database
 * updates the `repo_date` column of the `packages_last_checked` table
 * usually invoked via `echo /usr/local/libexec/freshports/check_repos_for_new_stuff.py | sudo su -l freshports`
+* sets `new_repo_ready_for_import` signal which will queue `import_packagesite.py`
 * runs in about 3 seconds when checking all 15 repos
 
 
@@ -35,6 +36,7 @@ There are three main scripts:
 * invokes `fetch-extract-parse-import-one-abi.sh` to do the import
 * calls `PackagesLastCheckedSetImportDate()` to mark the import as completed
 * usually invoked via `echo /usr/local/libexec/freshports/import_packagesite.py | sudo su -l freshports`
+* sets `new_repo_imported` signal which will queue `import_packagesite.py`
 * runs in about 70 seconds importing 15 repos
 
 

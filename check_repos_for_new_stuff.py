@@ -1,20 +1,20 @@
 #!/usr/local/bin/python
 
-import re
-import yaml
-import io
-import sys
+# check the repos for new build
+
+
 import psycopg2
 import psycopg2.extras
+import configparser # for config.ini parsing
+import re           # for escaping the database passwords
+import syslog       # for logging
 
 from pathlib import Path  # for touching the signal file
-import syslog             # for logging
 
 import os
+import sys
 
-from psycopg2.extensions import adapt
 
-import configparser # for config.ini parsing
 
 syslog.openlog(ident=os.path.basename(__file__), facility=syslog.LOG_LOCAL3)
 syslog.syslog(syslog.LOG_NOTICE, 'Starting up')
@@ -26,8 +26,8 @@ SCRIPT_DIR = config['filesystem']['SCRIPT_DIR']
 
 DSN = 'host=' + config['database']['HOST'] + ' dbname=' + config['database']['DBNAME'] + ' user=' + config['database']['PACKAGER_DBUSER'] + ' password=' + re.escape(config['database']['PACKAGER_PASSWORD'])
 
-SIGNAL_NEW_REPO = config['filesystem']['SIGNAL_NEW_REPO']
-
+SIGNAL_NEW_REPO_READY_FOR_IMPORT = config['filesystem']['SIGNAL_NEW_REPO_READY_FOR_IMPORT']
+SIGNAL_JOB_WAITING               = config['filesystem']['SIGNAL_JOB_WAITING']
 
 dbh = psycopg2.connect(DSN)
 curs = dbh.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -66,7 +66,8 @@ dbh.close();
 
 if len(ReposNeedImporting) > 0:
   # set the flag for job-waiting.pl
-  Path(SIGNAL_NEW_REPO)
+  Path(SIGNAL_NEW_REPO_READY_FOR_IMPORT).touch()
+  Path(SIGNAL_JOB_WAITING).touch()
   syslog.syslog(syslog.LOG_NOTICE, 'There are ' + ReposNeedImporting.length() + ' which need importing ' + str(ReposNeedImporting))
 else:
   syslog.syslog(syslog.LOG_NOTICE, 'No repos need importing')

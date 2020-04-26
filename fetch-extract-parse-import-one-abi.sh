@@ -6,7 +6,7 @@ LOGGER='logger -t freshports -p local3.info '
 
 JQ=/usr/local/bin/jq
 
-$LOGGER echo got into $0
+$LOGGER got into $0
 
 . /usr/local/etc/freshports/config.sh
 
@@ -83,6 +83,7 @@ fi
 
 $LOGGER "finished importing $abi/$package_set"
 
+# this is the return value expected by import_packagesite.py
 echo Done
 
 exit 0
