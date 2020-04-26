@@ -68,7 +68,7 @@ if len(ReposNeedImporting) > 0:
   # set the flag for job-waiting.pl
   Path(SIGNAL_NEW_REPO_READY_FOR_IMPORT).touch()
   Path(SIGNAL_JOB_WAITING).touch()
-  syslog.syslog(syslog.LOG_NOTICE, 'There are ' + ReposNeedImporting.length() + ' which need importing ' + str(ReposNeedImporting))
+  syslog.syslog(syslog.LOG_NOTICE, 'There are ' + str(len(ReposNeedImporting)) + ' new repos ready for import: ' + str(ReposNeedImporting))
 else:
   syslog.syslog(syslog.LOG_NOTICE, 'No repos need importing')
 

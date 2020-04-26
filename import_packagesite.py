@@ -41,6 +41,8 @@ curs = dbh.cursor(cursor_factory=psycopg2.extras.DictCursor)
 # for updating the rows
 cursUpdate = dbh.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
+ReposNeedImporting = []
+
 curs.callproc('PackagesGetReposNeedingImports')
 NumRows = curs.rowcount
 dbh.commit();
@@ -68,6 +70,7 @@ if (NumRows > 0):
       syslog.syslog(syslog.LOG_NOTICE, 'calling PackagesLastCheckedSetImportDate()')
       cursUpdate.callproc('PackagesLastCheckedSetImportDate', (abi_name, package_set))
       dbh.commit();
+      ReposNeedImporting.append(abi_name + ":" + package_set)
     else:
        pprint(result)
        sys.exit("something went wrong with the os.popen")
@@ -83,7 +86,7 @@ if NumRows > 0:
   Path(SIGNAL_NEW_REPO_READY_FOR_IMPORT).unlink()
   Path(SIGNAL_NEW_REPO_IMPORTED).touch()
   Path(SIGNAL_JOB_WAITING).touch()
-  syslog.syslog(syslog.LOG_NOTICE, 'There are ' + ReposNeedImporting.length() + ' which need importing ' + str(ReposNeedImporting))
+  syslog.syslog(syslog.LOG_NOTICE, 'There are ' + str(len(ReposNeedImporting)) + ' repos which need post-import processing: ' + str(ReposNeedImporting))
 else:
   syslog.syslog(syslog.LOG_NOTICE, 'No repos need importing. How did this happen? This should never happen.')
 
