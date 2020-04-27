@@ -27,6 +27,7 @@ SCRIPT_DIR = config['filesystem']['SCRIPT_DIR']
 DSN = 'host=' + config['database']['HOST'] + ' dbname=' + config['database']['DBNAME'] + ' user=' + config['database']['PACKAGER_DBUSER'] + ' password=' + re.escape(config['database']['PACKAGER_PASSWORD'])
 
 SIGNAL_NEW_REPO_READY_FOR_IMPORT = config['filesystem']['SIGNAL_NEW_REPO_READY_FOR_IMPORT']
+SIGNAL_JOB_WAITING               = config['filesystem']['SIGNAL_JOB_WAITING']
 
 dbh = psycopg2.connect(DSN)
 curs = dbh.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -66,6 +67,7 @@ dbh.close();
 if len(ReposNeedImporting) > 0:
   # set the flag for job-waiting.pl
   Path(SIGNAL_NEW_REPO_READY_FOR_IMPORT).touch()
+  Path(SIGNAL_JOB_WAITING).touch()
   syslog.syslog(syslog.LOG_NOTICE, 'There are ' + str(len(ReposNeedImporting)) + ' new repos ready for import: ' + str(ReposNeedImporting))
 else:
   syslog.syslog(syslog.LOG_NOTICE, 'No repos need importing')
