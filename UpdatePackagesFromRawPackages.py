@@ -54,9 +54,10 @@ cursUpdate.execute("ROLLBACK");
 dbh.close();
 
 
+# we must always remove the flag
+Path(SIGNAL_NEW_REPO_IMPORTED).unlink()
 if NumRows > 0:
   # set the flag for job-waiting.pl
-  Path(SIGNAL_NEW_REPO_IMPORTED).unlink()
   syslog.syslog(syslog.LOG_NOTICE, 'There were ' + str(NumRows) + ' repos updated in packages.')
 else:
   syslog.syslog(syslog.LOG_NOTICE, 'There were no packages to update.  I should never be called like this.  It is such an inconvenience. Have you no shame?')

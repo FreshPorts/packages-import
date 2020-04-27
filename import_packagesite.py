@@ -80,9 +80,11 @@ if (NumRows > 0):
 dbh.rollback();
 dbh.close();
 
+# we must always remove this when we finish
+Path(SIGNAL_NEW_REPO_READY_FOR_IMPORT).unlink()
+
 if NumRows > 0:
   # set the flag for job-waiting.pl
-  Path(SIGNAL_NEW_REPO_READY_FOR_IMPORT).unlink()
   Path(SIGNAL_NEW_REPO_IMPORTED).touch()
   syslog.syslog(syslog.LOG_NOTICE, 'There are ' + str(len(ImportedRepos)) + ' repos which need post-import processing: ' + str(ImportedRepos))
 else:
