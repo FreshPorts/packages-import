@@ -36,7 +36,7 @@ curs = dbh.cursor(cursor_factory=psycopg2.extras.DictCursor)
 cursUpdate = dbh.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 # There are no repos to import
-ReposNeedImporting = []
+ReposWhichNeedImporting = []
 
 curs.execute("SELECT * from GetReposToReview()")
 NumRows = curs.rowcount
@@ -59,16 +59,16 @@ if (NumRows > 0):
     cursUpdate.callproc('PackagesLastCheckedSetRepoDate', (row['abi_name'],row['package_set'], repo_date))
     retval = cursUpdate.fetchone()[0]
     if retval == 1:
-      ReposNeedImporting.append(row['abi_name'] + '/' + row['package_set'] + ' : ' + repo_date)
+      ReposWhichNeedImporting.append(row['abi_name'] + '/' + row['package_set'] + ' : ' + repo_date)
 
 dbh.commit();
 dbh.close();
 
-if len(ReposNeedImporting) > 0:
+if len(ReposWhichNeedImporting) > 0:
   # set the flag for job-waiting.pl
   Path(SIGNAL_NEW_REPO_READY_FOR_IMPORT).touch()
   Path(SIGNAL_JOB_WAITING).touch()
-  syslog.syslog(syslog.LOG_NOTICE, 'There are ' + str(len(ReposNeedImporting)) + ' new repos ready for import: ' + str(ReposNeedImporting))
+  syslog.syslog(syslog.LOG_NOTICE, 'There are ' + str(len(ReposWhichNeedImporting)) + ' new repos ready for import: ' + str(ReposWhichNeedImporting))
 else:
   syslog.syslog(syslog.LOG_NOTICE, 'No repos need importing')
 
