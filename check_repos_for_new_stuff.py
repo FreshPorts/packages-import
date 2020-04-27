@@ -59,7 +59,7 @@ if (NumRows > 0):
     cursUpdate.callproc('PackagesLastCheckedSetRepoDate', (row['abi_name'],row['package_set'], repo_date))
     retval = cursUpdate.fetchone()[0]
     if retval == 1:
-      ReposWhichNeedImporting.append(row['abi_name'] + '/' + row['package_set'] + ' : ' + repo_date)
+      ReposWhichNeedImporting.append(row['abi_name'] + '/' + row['package_set'] + ' : ' + str(repo_date or ""))
 
 dbh.commit();
 dbh.close();
