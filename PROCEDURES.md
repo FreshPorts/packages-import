@@ -19,5 +19,6 @@ UPDATE packages_last_checked PLC
 
 This signals that there is work to be done. It is run on the ingress server.
 
+```
 echo touch /var/db/freshports/signals/new_repo_imported /var/db/freshports/signals/job_waiting | sudo su -fm freshports
-
+```
