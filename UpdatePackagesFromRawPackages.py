@@ -60,7 +60,7 @@ if NumRows > 0:
   syslog.syslog(syslog.LOG_NOTICE, 'There were ' + str(NumRows) + ' repos updated in packages.')
 
   # this will prompt the front ends to clear their package caches
-  cursUpdate.execute("RAISE packages_imported")
+  cursUpdate.execute("NOTIFY packages_imported")
 else:
   syslog.syslog(syslog.LOG_NOTICE, 'There were no packages to update.  I should never be called like this.  It is such an inconvenience. Have you no shame?')
 
