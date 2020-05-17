@@ -1,7 +1,7 @@
 These are the instructions for updating a FreshPorts instance to use the new
 packages features.
 
-pkg install freshports-www-packages
+pkg install freshports-www
 
 Database upgrade:
 
@@ -9,6 +9,7 @@ From a copy of svn+ssh://svnusers@svn.int.unixathome.org/freshports-1/database-s
 
 psql DB
 begin;
+CREATE ROLE packaging;
 \i updates-2020-04-20-packages.ddl
 \i ri.txt
 \i updates-2020-04-20-packages.ddl.after.ri.xt
@@ -29,6 +30,7 @@ create user packager? password 'changeme' IN ROLE packaging;
 
 on the webserver: freshports-www-packages
 
+- nope, nothing in there releated to packages
 permissions from configuration/POSTGRESQL.sql
 
 
@@ -70,6 +72,15 @@ PKG_ZFS_SNAPSHOT    = system/data/freshports-cache-packages/CHANGEME@empty
 
 update /usr/local/etc/freshports/config.pm based on config.pm.sample
 
+-- insert this so fp-listen knows to listen
+freshports.org=# insert into listen_for ( name, script_name ) values ('listen_for', 'ClearPackagesCache');
+
+
+
+
+
+
+
 
 
 This was my original note:
@@ -93,6 +104,10 @@ fp_check_repos_for_new_builds_enable="YES"
 
 create role packager_test with password 'redacted';
 grant packaging to packager_test
+grant select on element_pathname to packaging;
+grant select on ports            to packaging;
+grant UPDATE ON packages_raw     TO packaging;
+grant update on packages         to packaging;
 alter user packager_test login;
 
 /usr/local/etc/freshports/config.sh needs these new entries:
