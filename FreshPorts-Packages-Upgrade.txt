@@ -1,0 +1,117 @@
+These are the instructions for updating a FreshPorts instance to use the new
+packages features.
+
+pkg install freshports-www-packages
+
+Database upgrade:
+
+From a copy of svn+ssh://svnusers@svn.int.unixathome.org/freshports-1/database-schema/trunk
+
+psql DB
+begin;
+\i updates-2020-04-20-packages.ddl
+\i ri.txt
+\i updates-2020-04-20-packages.ddl.after.ri.xt
+\i sp.txt
+
+Should be no errors.
+
+These are OK:
+
+psql:ri.txt:1024: NOTICE:  trigger "ports_origin_maintain" for relation "ports" does not exist, skipping
+psql:ri.txt:1043: NOTICE:  trigger "packages_last_checked_maintain" for relation "abi" does not exist, skipping
+
+Ignore them.
+
+configure pg_hba.conf to allow new package-based users
+
+create user packager? password 'changeme' IN ROLE packaging;
+
+on the webserver: freshports-www-packages
+
+permissions from configuration/POSTGRESQL.sql
+
+
+
+On the ingress server:
+
+sudo pkg install packages-import
+
+In /usr/local/etc/freshports/config.ini set the redacted values, and the PACKAGER_DBUSER
+for this host.
+
+in /usr/local/etc/freshports/config.ini set BASEDIR_PACKAGER
+
+
+
+Add to /etc/periodic.conf:
+
+fp_check_repos_for_new_builds_enable="YES"
+
+
+On the web server:
+
+Create your [jailed?] filesystem for use with the database....
+re: https://dan.langille.org/2020/04/29/using-zfs-rollback-for-cache-clearing/
+
+Snapshot the 'empty' rollback point:
+
+sudo zfs snapshot system/data/freshports-cache-packages/CHANGEME@empty
+
+Delegate the rollback:
+
+sudo zfs allow freshports rollback system/data/freshports-cache-packages/CHANGEME
+
+set the correct dataset name in /usr/local/etc/freshports/fp-listen.ini
+
+PKG_ZFS_SNAPSHOT    = system/data/freshports-cache-packages/CHANGEME@empty
+
+
+
+update /usr/local/etc/freshports/config.pm based on config.pm.sample
+
+
+
+This was my original note:
+
+need role creation
+
+invoke
+
+Need tables.
+
+* /usr/local/www/freshports/configuration/POSTGRESQL.sql for db permissions
+* /usr/home/dan/src/freshports/database-schema/sp.txt
+* /usr/home/dan/src/freshports/database-schema/ri.txt
+
+freshports.test=# alter table packages_raw owner to packager_test;
+ALTER TABLE
+
+
+/etc/periodic.conf
+fp_check_repos_for_new_builds_enable="YES"
+
+create role packager_test with password 'redacted';
+grant packaging to packager_test
+alter user packager_test login;
+
+/usr/local/etc/freshports/config.sh needs these new entries:
+
+BASEDIR_PACKAGER="/var/db/freshports/packagesite"
+
+/usr/local/etc/freshports/config.pm needs these:
+
++$FreshPorts::Config::NewReposReadyForImport     = $FreshPorts::Config::BaseDir . '/signals/new_repo_ready_for_import';
++$FreshPorts::Config::NewRepoImported            = $FreshPorts::Config::BaseDir . '/signals/new_repo_imported';
+
+/usr/local/etc/freshports/config.ini needs these:
+
+CATEGORY_CACHE_PATH = %(BASEDIR)s/cache/categories/%%s/*
+
+# this is the name of the zfs filesystem to rollback, including the snapshot name
+PKG_ZFS_SNAPSHOT    = system/data/freshports-cache-packages/dev-nginx01@empty
+
+
+create new packages fileset
+
+
