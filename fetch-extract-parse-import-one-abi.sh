@@ -38,36 +38,51 @@ then
   exit 1
 fi
 
-rm -f packagesite.txz packagesite.tar
+fetch --quiet https://pkg.freebsd.org/$abi/$package_set/meta.conf
 if [ $? -ne 0 ]
 then
-  $LOGGER -t $LOGGERTAG "FATAL error: unable to rm packagesite.txz packagesite.tar - $0 terminating"
+  $LOGGER -t $LOGGERTAG "FATAL error: unable to fetch https://pkg.freebsd.org/$abi/$package_set/meta.conf"
   exit 1
 fi  
 
-fetch --quiet https://pkg.freebsd.org/$abi/$package_set/packagesite.txz
+# This is the name of the archive we need to download
+ARCHIVE=$(grep 'manifests_archive = ' meta.conf | cut -f 2 -d '=' | cut -f 2 -d '"')
+
+# This is the archive format, usually txz
+FORMAT=$(grep 'packing_format = ' meta.conf | cut -f 2 -d '=' | cut -f 2 -d '"')
+
+# This is the name of the file we pull down from the server
+ARCHIVE_FILE="${ARCHIVE}.${FORMAT}"
+
+# the name of the file is obtained from meta.conf - look for manifests
+# This is the archive format, usually txz
+PACKAGE_FILE=$(grep 'manifests = ' meta.conf | cut -f 2 -d '=' | cut -f 2 -d '"')
+
+# I'm not sure of the historical reasons for removing these files
+rm -f ${ARCHIVE_FILE} "${ARCHIVE}.tar"
 if [ $? -ne 0 ]
 then
-  $LOGGER -t $LOGGERTAG "FATAL error: unable to fetch https://pkg.freebsd.org/$abi/$package_set/packagesite.txz - $0 terminating"
+  $LOGGER -t $LOGGERTAG "FATAL error: unable to rm ${ARCHIVE_FILE} ${ARCHIVE}.tar - $0 terminating"
+  exit 1
+fi  
+
+# grab the file we need
+fetch --quiet https://pkg.freebsd.org/$abi/$package_set/${ARCHIVE_FILE}
+if [ $? -ne 0 ]
+then
+  $LOGGER -t $LOGGERTAG "FATAL error: unable to fetch https://pkg.freebsd.org/$abi/$package_set/${ARCHIVE_FILE} - $0 terminating"
   exit 1
 fi
 
-#unxz packagesite.txz
-#if [ $? -ne 0 ]
-#then
-#  $LOGGER -t $LOGGERTAG "FATAL error: unable to unxz packagesite.txz - $0 terminating"
-#  exit 1
-#fi
-
-tar -xf packagesite.txz
+# unpackage it
+tar -xf ${ARCHIVE_FILE}
 if [ $? -ne 0 ]
 then
-  $LOGGER -t $LOGGERTAG "FATAL error: unable to tar -xf packagesite.txz - $0 terminating"
+  $LOGGER -t $LOGGERTAG "FATAL error: unable to tar -xf ${ARCHIVE_FILE} - $0 terminating"
   exit 1
 fi
 
-
-$JQ -rc --arg ABI "$abi" --arg PACKAGE_SET "$package_set" '[$ABI, $PACKAGE_SET, .origin, .name, .version] | @tsv' < packagesite.yaml > packagesite.tsv
+$JQ -rc --arg ABI "$abi" --arg PACKAGE_SET "$package_set" '[$ABI, $PACKAGE_SET, .origin, .name, .version] | @tsv' < ${PACKAGE_FILE} > packagesite.tsv
 if [ $? -ne 0 ]
 then
   $LOGGER -t $LOGGERTAG "FATAL error: unable to run jq to get the tsv file - $0 terminating"
