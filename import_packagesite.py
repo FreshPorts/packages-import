@@ -71,8 +71,8 @@ if (NumRows > 0):
       dbh.commit();
       ImportedRepos.append(abi_name + ":" + package_set)
     else:
-       pprint(result)
-       sys.exit("something went wrong with the os.popen")
+      pprint(result)
+      syslog.syslog(syslog.LOG_CRIT, 'something went wrong with the os.popen for ' + abi_name + " " + package_set)
 
     # safe thing to do here
     dbh.rollback();
