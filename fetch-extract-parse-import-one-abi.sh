@@ -38,27 +38,44 @@ then
   exit 1
 fi
 
+# NOTE: some older ABI do not have meta.conf
+# Notably
+# * FreeBSD:12:aarch64 latest, 
+# * FreeBSD:12:armv6 latest
+# * FreeBSD:12:armv7
+#
+# If not found, we assumes it is older, and use older default values.
+#
+ 
 fetch --quiet https://pkg.freebsd.org/$abi/$package_set/meta.conf
 if [ $? -ne 0 ]
 then
-  $LOGGER -t $LOGGERTAG "FATAL error: unable to fetch https://pkg.freebsd.org/$abi/$package_set/meta.conf"
-  exit 1
-fi  
+  $LOGGER -t $LOGGERTAG "WARNING: unable to fetch https://pkg.freebsd.org/$abi/$package_set/meta.conf - using default values."
+  ARCHIVE=packagesite
+  ARCHIVE_FILE=packagesite.txz
+  PACKAGE_FILE=packagesite.yaml
+else
 
-# This is the name of the archive we need to download
-ARCHIVE=$(grep 'manifests_archive = ' meta.conf | cut -f 2 -d '=' | cut -f 2 -d '"')
+  # This is the name of the archive we need to download
+  ARCHIVE=$(grep 'manifests_archive = ' meta.conf | cut -f 2 -d '=' | cut -f 2 -d '"')
 
-# This is the archive format, usually txz
-FORMAT=$(grep 'packing_format = ' meta.conf | cut -f 2 -d '=' | cut -f 2 -d '"')
+  # This is the archive format, usually txz
+  FORMAT=$(grep 'packing_format = ' meta.conf | cut -f 2 -d '=' | cut -f 2 -d '"')
 
-# This is the name of the file we pull down from the server
-ARCHIVE_FILE="${ARCHIVE}.${FORMAT}"
+  # This is the name of the file we pull down from the server
+  ARCHIVE_FILE="${ARCHIVE}.${FORMAT}"
 
-# the name of the file is obtained from meta.conf - look for manifests
-# This is the archive format, usually txz
-PACKAGE_FILE=$(grep 'manifests = ' meta.conf | cut -f 2 -d '=' | cut -f 2 -d '"')
+  # the name of the file is obtained from meta.conf - look for manifests
+  # This is the archive format, usually txz
+  PACKAGE_FILE=$(grep 'manifests = ' meta.conf | cut -f 2 -d '=' | cut -f 2 -d '"')
+fi
 
+#
 # I'm not sure of the historical reasons for removing these files
+# perhaps to be use we're not using files from the previous fetch
+#
+# NOTE: We seem to be doing this in the home directory. Hmmm.
+#
 rm -f ${ARCHIVE_FILE} "${ARCHIVE}.tar"
 if [ $? -ne 0 ]
 then
