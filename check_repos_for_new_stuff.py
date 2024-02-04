@@ -28,7 +28,7 @@ DSN = 'host=' + config['database']['HOST'] + \
       ' dbname=' + config['database']['DBNAME'] + \
       ' user=' + config['database']['PACKAGER_DBUSER'] + \
       ' password=' + re.escape(config['database']['PACKAGER_PASSWORD']) + \
-      ' require_auth=md5 sslmode=verify-full sslcertmode=disable'
+      ' sslcertmode=disable'
 
 SIGNAL_NEW_REPO_READY_FOR_IMPORT = config['filesystem']['SIGNAL_NEW_REPO_READY_FOR_IMPORT']
 SIGNAL_JOB_WAITING               = config['filesystem']['SIGNAL_JOB_WAITING']
