@@ -1,4 +1,4 @@
-#!/usr/local/bin/python
+#!/usr/local/bin/python3.9
 
 # Update the packages_raw table with port_id and abi_id
 # Then update the packages tables from packages_raw
@@ -12,8 +12,6 @@ import syslog       # for logging
 from pathlib import Path  # for touching the signal file
 
 import os
-
-
 
 
 syslog.openlog(ident=os.path.basename(__file__), facility=syslog.LOG_LOCAL3)
@@ -35,6 +33,9 @@ curs = dbh.cursor(cursor_factory=psycopg2.extras.DictCursor)
 # for updating the rows
 cursUpdate = dbh.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
+# before we start, delete the existing package notifications.
+
+curs.execute("truncate package_notifications;")
 
 curs.execute("SELECT * from PackagesGetImportedReposNeedingProcessing()")
 NumRows = curs.rowcount
