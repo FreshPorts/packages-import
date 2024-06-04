@@ -1,4 +1,4 @@
-#!/usr/local/bin/python3.9
+#!/usr/local/bin/python
 
 # Update the packages_raw table with port_id and abi_id
 # Then update the packages tables from packages_raw
@@ -22,7 +22,7 @@ config.read('/usr/local/etc/freshports/config.ini')
 
 SCRIPT_DIR = config['filesystem']['SCRIPT_DIR']
 
-DSN = 'host=' + config['database']['HOST'] + ' dbname=' + config['database']['DBNAME'] + ' user=' + config['database']['PACKAGER_DBUSER'] + ' password=' + re.escape(config['database']['PACKAGER_PASSWORD'])
+DSN = 'host=' + config['database']['HOST'] + ' dbname=' + config['database']['DBNAME'] + ' user=' + config['database']['PACKAGER_DBUSER'] + ' password=' + re.escape(config['database']['PACKAGER_PASSWORD']) + ' sslcertmode=disable'
 
 # the flag we will remove
 SIGNAL_NEW_REPO_IMPORTED = config['filesystem']['SIGNAL_NEW_REPO_IMPORTED']

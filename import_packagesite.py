@@ -24,7 +24,7 @@ config.read('/usr/local/etc/freshports/config.ini')
 
 SCRIPT_DIR = config['filesystem']['SCRIPT_DIR']
 
-DSN = 'host=' + config['database']['HOST'] + ' dbname=' + config['database']['DBNAME'] + ' user=' + config['database']['PACKAGER_DBUSER'] + ' password=' + re.escape(config['database']['PACKAGER_PASSWORD'])
+DSN = 'host=' + config['database']['HOST'] + ' dbname=' + config['database']['DBNAME'] + ' user=' + config['database']['PACKAGER_DBUSER'] + ' password=' + re.escape(config['database']['PACKAGER_PASSWORD']) + ' sslcertmode=disable'
 
 PKG_SITE_DIR = config['filesystem']['PACKAGE_IMPORT_DIR']
 
