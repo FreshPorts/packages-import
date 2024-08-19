@@ -31,9 +31,6 @@ PKG_SITE_DIR = config['filesystem']['PACKAGE_IMPORT_DIR']
 # the flag we will remove
 SIGNAL_NEW_REPO_READY_FOR_IMPORT = config['filesystem']['SIGNAL_NEW_REPO_READY_FOR_IMPORT']
 
-# the flags we will set
-SIGNAL_NEW_REPO_IMPORTED = config['filesystem']['SIGNAL_NEW_REPO_IMPORTED']
-
 dbh = psycopg2.connect(DSN)
 curs = dbh.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
@@ -70,6 +67,26 @@ if (NumRows > 0):
       cursUpdate.callproc('PackagesLastCheckedSetImportDate', (abi_name, package_set))
       dbh.commit();
       ImportedRepos.append(abi_name + ":" + package_set)
+
+      # this is where we could invoke:
+      #
+      # * UpdatePackagesFromRawPackages.py
+      # * report-notification-packages.pl
+      #
+      # re https://github.com/FreshPorts/freshports/issues/590
+      #
+
+      command = SCRIPT_DIR + '/UpdatePackagesFromRawPackages.py'
+      syslog.syslog(syslog.LOG_NOTICE, "command is: " + command);
+      result = os.popen(command).readlines()
+
+      syslog.syslog(syslog.LOG_NOTICE, "done running UpdatePackagesFromRawPackages.py");
+
+      command = SCRIPT_DIR + '/report-notification-packages.pl'
+      syslog.syslog(syslog.LOG_NOTICE, "command is: " + command);
+      result = os.popen(command).readlines()
+      syslog.syslog(syslog.LOG_NOTICE, 'done running report-notification-packages.pl');
+
     else:
       pprint(result)
       syslog.syslog(syslog.LOG_CRIT, 'something went wrong with the os.popen for ' + abi_name + " " + package_set)
@@ -85,8 +102,7 @@ Path(SIGNAL_NEW_REPO_READY_FOR_IMPORT).unlink()
 
 if NumRows > 0:
   # set the flag for job-waiting.pl
-  Path(SIGNAL_NEW_REPO_IMPORTED).touch()
-  syslog.syslog(syslog.LOG_NOTICE, 'There are ' + str(len(ImportedRepos)) + ' repos which need post-import processing: ' + str(ImportedRepos))
+  syslog.syslog(syslog.LOG_NOTICE, 'Number of repos processed: ' + str(len(ImportedRepos)) + '. Details: ' + str(ImportedRepos))
 else:
   syslog.syslog(syslog.LOG_NOTICE, 'No repos need importing. How did this happen? This should never happen.')
 

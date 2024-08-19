@@ -1,8 +1,9 @@
-# 2020-04-12
+# 2024-0-18
 
 Current status - we have hover text for each repo/ABI combination.
 
 # The scripts
+
 There are three main scripts:
 
 1. check the repos for new stuff to import
@@ -29,14 +30,18 @@ There are three main scripts:
 * could be modified to use HEAD and get the actual value from the file
 
 
-## import_packagesite.py
+##### import_packagesite.py
 
 * imports some data from `packagesite.yaml`
 * gets list of ABI/package-set values from `PackagesGetReposNeedingImports()`
-* invokes `fetch-extract-parse-import-one-abi.sh` to do the import
+* for each of them:
+** invokes `fetch-extract-parse-import-one-abi.sh` to do the import into the `packages_raw` table
+** `UpdatePackagesFromRawPackages.py` is invoked to update the `packages`
+   tables from the `packages_raw` table - these updates, via triggers,  populate the
+   `packages_notifications` table
+** `report-notification-packages.pl` is then invoked to notify the users
 * calls `PackagesLastCheckedSetImportDate()` to mark the import as completed
 * usually invoked via `echo /usr/local/libexec/freshports/import_packagesite.py | sudo su -l freshports`
-* sets `new_repo_imported` signal which will queue `import_packagesite.py`
 * runs in about 70 seconds importing 15 repos
 
 
@@ -62,12 +67,6 @@ There are three main scripts:
 * usually invoked via `echo /usr/local/libexec/freshports/UpdatePackagesFromRawPackages.py | sudo su -l freshports`
 * runs in about 40 seconds when importing 15 repos
 
-# now deprecated
-
-## import-raw-abi.sh
-
-* shell script to extract values from `packagesite.txz` and convert to tab delimited file
-* invokes `import-via-copy-packagesite-all-raw-fields.py` to populate the `packages_raw` table
 
 # Older stuff
 
@@ -134,11 +133,19 @@ $ cat /usr/local/etc/freshports/config.ini
 # configuration items
 #
 [database]
-DBNAME            = 'freshports.dev'
-HOST              = pg.example.org
+DBNAME             = 'freshports.dev'
+HOST               = pg.example.org
 
-PACKAGER_DBUSER   = 'packager_dev'
-PACKAGER_PASSWORD = '[redacted]'
+PACKAGER_DBUSER    = 'packager_dev'
+# if there is a % in the password, escape it with a %
+PACKAGER_PASSWORD  = '[redacted]'
+
+[filesystem]
+SCRIPT_DIR         = %%PREFIX%%/libexec/freshports
+PACKAGE_IMPORT_DIR = /var/db/freshports/packagesite
+
+SIGNAL_NEW_REPO_READY_FOR_IMPORT = /var/db/freshports/signals/new_repo_ready_for_import
+SIGNAL_JOB_WAITING               = /var/db/freshports/signals/job_waiting
 ```
 
 

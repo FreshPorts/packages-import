@@ -24,9 +24,6 @@ SCRIPT_DIR = config['filesystem']['SCRIPT_DIR']
 
 DSN = 'host=' + config['database']['HOST'] + ' dbname=' + config['database']['DBNAME'] + ' user=' + config['database']['PACKAGER_DBUSER'] + ' password=' + re.escape(config['database']['PACKAGER_PASSWORD']) + ' sslcertmode=disable'
 
-# the flag we will remove
-SIGNAL_NEW_REPO_IMPORTED = config['filesystem']['SIGNAL_NEW_REPO_IMPORTED']
-
 dbh = psycopg2.connect(DSN)
 curs = dbh.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
@@ -53,9 +50,6 @@ if (NumRows > 0):
 
 cursUpdate.execute("ROLLBACK");
 
-
-# we must always remove the flag
-Path(SIGNAL_NEW_REPO_IMPORTED).unlink()
 if NumRows > 0:
   # set the flag for job-waiting.pl
   syslog.syslog(syslog.LOG_NOTICE, 'There were ' + str(NumRows) + ' repos updated in packages.')
@@ -63,7 +57,7 @@ if NumRows > 0:
   # this will prompt the front ends to clear their package caches
   cursUpdate.execute("NOTIFY packages_imported")
 else:
-  syslog.syslog(syslog.LOG_NOTICE, 'There were no packages to update.  I should never be called like this.  It is such an inconvenience. Have you no shame?')
+  syslog.syslog(syslog.LOG_NOTICE, 'There were no packages to update.  I should never be called like this.  It is such an inconvenience.  Have you no shame?')
 
 dbh.close();
 

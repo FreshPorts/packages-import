@@ -13,7 +13,9 @@ JQ=/usr/local/bin/jq
 $LOGGER -t $LOGGERTAG starting $0
 
 # we just try to create every time
-mkdir -p $BASEDIR_PACKAGER/$abi/$package_set
+WORKDIR="$BASEDIR_PACKAGER/$abi/$package_set"
+$LOGGER -t $LOGGERTAG creating $WORKDIR
+mkdir -p $WORKDIR
 
 if [ ! -d $BASEDIR_PACKAGER ]
 then
@@ -21,20 +23,21 @@ then
   exit 1
 fi
 
-if [ ! -d $BASEDIR_PACKAGER/$abi/$package_set ]
+if [ ! -d $WORKDIR ]
 then
-  mkdir -p $BASEDIR_PACKAGER/$abi/$package_set
+  mkdir -p $WORKDIR
   if [ $? -ne 0 ]
   then
-    $LOGGER -t $LOGGERTAG "FATAL error: unable to create $BASEDIR_PACKAGER/$abi/$package_set - $0 terminating"
+    $LOGGER -t $LOGGERTAG "FATAL error: unable to create $WORKDIR - $0 terminating"
     exit 1
   fi  
 fi
 
-cd $BASEDIR_PACKAGER/$abi/$package_set/
+$LOGGER -t $LOGGERTAG cd $WORKDIR/
+cd $WORKDIR/
 if [ $? -ne 0 ]
 then
-  $LOGGER -t $LOGGERTAG "FATAL error: unable to cd $BASEDIR_PACKAGER/$abi/$package_set - $0 terminating"
+  $LOGGER -t $LOGGERTAG "FATAL error: unable to cd $WORKDIR - $0 terminating"
   exit 1
 fi
 
@@ -47,6 +50,7 @@ fi
 # If not found, we assumes it is older, and use older default values.
 #
  
+$LOGGER -t $LOGGERTAG fetch --quiet https://pkg.freebsd.org/$abi/$package_set/meta.conf
 fetch --quiet https://pkg.freebsd.org/$abi/$package_set/meta.conf
 if [ $? -ne 0 ]
 then
@@ -74,8 +78,8 @@ fi
 # I'm not sure of the historical reasons for removing these files
 # perhaps to be use we're not using files from the previous fetch
 #
-# NOTE: We seem to be doing this in the home directory. Hmmm.
 #
+$LOGGER -t $LOGGERTAG rm -f ${ARCHIVE_FILE} "${ARCHIVE}.tar"
 rm -f ${ARCHIVE_FILE} "${ARCHIVE}.tar"
 if [ $? -ne 0 ]
 then
@@ -84,6 +88,7 @@ then
 fi  
 
 # grab the file we need
+$LOGGER -t $LOGGERTAG fetch --quiet https://pkg.freebsd.org/$abi/$package_set/${ARCHIVE_FILE}
 fetch --quiet https://pkg.freebsd.org/$abi/$package_set/${ARCHIVE_FILE}
 if [ $? -ne 0 ]
 then
@@ -92,6 +97,7 @@ then
 fi
 
 # unpackage it
+$LOGGER -t $LOGGERTAG tar -xf ${ARCHIVE_FILE}
 tar -xf ${ARCHIVE_FILE}
 if [ $? -ne 0 ]
 then
@@ -99,6 +105,7 @@ then
   exit 1
 fi
 
+$LOGGER -t $LOGGERTAG $JQ -rc --arg ABI "$abi" --arg PACKAGE_SET "$package_set" '[$ABI, $PACKAGE_SET, .origin, .name, .version] | @tsv' from ${PACKAGE_FILE} into packagesite.tsv
 $JQ -rc --arg ABI "$abi" --arg PACKAGE_SET "$package_set" '[$ABI, $PACKAGE_SET, .origin, .name, .version] | @tsv' < ${PACKAGE_FILE} > packagesite.tsv
 if [ $? -ne 0 ]
 then
@@ -106,16 +113,18 @@ then
   exit 1
 fi
 
-$SCRIPTDIR/import-via-copy-packagesite-all-raw-fields.py -i packagesite.tsv
+# specifying the full path name to this script so it shows up better in the logs of that script
+$LOGGER -t $LOGGERTA $SCRIPTDIR/import-via-copy-packagesite-all-raw-fields.py -i $WORKDIR/packagesite.tsv
+$SCRIPTDIR/import-via-copy-packagesite-all-raw-fields.py -i $WORKDIR/packagesite.tsv
 if [ $? -ne 0 ]
 then
-  $LOGGER -t $LOGGERTAG "FATAL error: unable to run import-via-copy-packagesite.py to import the file - $0 terminating"
+  $LOGGER -t $LOGGERTAG "FATAL error: unable to run import-via-copy-packagesite-all-raw-fields.py to import the file - $0 terminating"
   exit 1
 fi
 
 $LOGGER -t $LOGGERTAG "finished importing $abi/$package_set"
 
-# this is the return value expected by import_packagesite.py
+# this is the return value expected by import_packagesite.py - look for: result = os.popen(command).readlines()
 echo Done
 
 $LOGGER -t $LOGGERTAG "finishes"

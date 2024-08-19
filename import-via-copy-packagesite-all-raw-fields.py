@@ -16,9 +16,6 @@ import os
 
 
 
-syslog.openlog(ident=os.path.basename(__file__), facility=syslog.LOG_LOCAL3)
-syslog.syslog(syslog.LOG_NOTICE, 'Starting up')
-
 def main(argv):
    inputfile = ''
    outputfile = ''
@@ -46,13 +43,17 @@ def main(argv):
    dbh = psycopg2.connect(DSN)
    curs = dbh.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-
+#
+# someone else does the truncate: no, it's a delete. See PackagesRawDeleteForABIPackageSet() in sp.txt
+# It is invoked by UpdatePackagesFromRawPackages() on a ABI/set basis.
+#
    curs.execute("select freshports_branch_set('head')")
    with open(inputfile, 'r') as f:
       curs.copy_from(f, 'packages_raw', sep = '\t', columns = ['abi', 'package_set', 'package_origin', 'package_name', 'package_version'] )
 
    dbh.commit()
    dbh.close();
+   syslog.syslog(syslog.LOG_NOTICE, 'copying completed')
 
 syslog.openlog(ident=os.path.basename(__file__), facility=syslog.LOG_LOCAL3)
 syslog.syslog(syslog.LOG_NOTICE, 'Starting up')
