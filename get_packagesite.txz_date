@@ -1,6 +1,27 @@
 #!/bin/sh
 
-ABI=$1
-BRANCH=$2
+abi=$1
+package_set=$2
 
-curl -sI https://pkg.freebsd.org/$ABI/$BRANCH/packagesite.txz  | grep -i last-modified: | sed -e 's/Last-modified: //i'
+# At the time of writing, this script was invoked from check_repos_for_new_stuff.py
+
+# get the name of this script
+LOGGERTAG=${0##*/}
+
+. /usr/local/etc/freshports/config.sh
+
+# kmod has a special URL scheme. Nice, eh?
+
+if [ $package_set == "kmod" ]
+then
+  url_package_set="kmods_latest_2"
+else
+  url_package_set=$package_set
+fi
+
+# after running this script, we'll have the right value for ARCHIVE_FILE
+. $SCRIPTDIR/fetch-parse-meta.conf
+
+#curl -sI https://pkg.freebsd.org/$abi/$package_set/$ARCHIVE_FILE  | grep -i last-modified: | sed -e 's/Last-modified: //i'
+curl -sI https://pkg.freebsd.org/$abi/$package_set/$ARCHIVE_FILE  | sed -n -e ' s/Last-modified: //ip'
+
