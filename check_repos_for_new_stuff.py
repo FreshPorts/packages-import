@@ -22,6 +22,11 @@ syslog.syslog(syslog.LOG_NOTICE, 'Starting up')
 config = configparser.ConfigParser()
 config.read('/usr/local/etc/freshports/config.ini')
 
+offline = Path(config['filesystem']['SIGNAL_OFFLINE'])
+if offline.is_file():
+  syslog.syslog(syslog.LOG_NOTICE, __file__ + ' is exiting because the system is OFFLINE')
+  sys.exit()
+
 SCRIPT_DIR = config['filesystem']['SCRIPT_DIR']
 
 DSN = 'host=' + config['database']['HOST'] + \
@@ -50,6 +55,8 @@ if (NumRows > 0):
   for row in rows:
 
     # Get the Last-modified date of the repo
+    # this script is kmod-ware and will convert package_set as required.
+    #
     command = SCRIPT_DIR + "/get_packagesite.txz_date " + row['abi_name'] + " " + row['package_set']
     timestamp = os.popen(command).readlines()
     if timestamp == []:
