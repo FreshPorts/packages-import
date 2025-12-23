@@ -55,7 +55,7 @@ then
 fi
 
 $LOGGER -t $LOGGERTAG $JQ -rc --arg ABI "$abi" --arg PACKAGE_SET "$package_set" '[$ABI, $PACKAGE_SET, .origin, .name, .version] | @tsv' from ${PACKAGE_FILE} into packagesite.tsv
-$JQ -rc --arg ABI "$abi" --arg PACKAGE_SET "$package_set" '[$ABI, $PACKAGE_SET, .origin, .name, .version] | @tsv' < ${PACKAGE_FILE} > packagesite.tsv
+$JQ -rc --arg ABI "$abi" --arg PACKAGE_SET "$package_set" '.packages[] | [$ABI, $PACKAGE_SET, .origin, .name, .version] | @tsv' < ${PACKAGE_FILE} > packagesite.tsv
 if [ $? -ne 0 ]
 then
   $LOGGER -t $LOGGERTAG "FATAL error: unable to run jq to get the tsv file - $0 terminating"
