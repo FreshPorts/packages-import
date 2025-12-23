@@ -25,15 +25,14 @@ fi
 . $SCRIPTDIR/fetch-parse-meta.conf
 
 #
-# I'm not sure of the historical reasons for removing these files
-# perhaps to be use we're not using files from the previous fetch
+# We let the old files linger for post-processing debugging.
+# We delete them now, just because
 #
-#
-$LOGGER -t $LOGGERTAG rm -f ${ARCHIVE_FILE} "${ARCHIVE}.tar"
-rm -f ${ARCHIVE_FILE} "${ARCHIVE}.tar"
+$LOGGER -t $LOGGERTAG rm -f ${ARCHIVE_FILE}
+rm -f ${ARCHIVE_FILE}
 if [ $? -ne 0 ]
 then
-  $LOGGER -t $LOGGERTAG "FATAL error: unable to rm ${ARCHIVE_FILE} ${ARCHIVE}.tar - $0 terminating"
+  $LOGGER -t $LOGGERTAG "FATAL error: unable to rm ${ARCHIVE_FILE} - $0 terminating"
   exit 1
 fi  
 
@@ -55,7 +54,7 @@ then
 fi
 
 $LOGGER -t $LOGGERTAG $JQ -rc --arg ABI "$abi" --arg PACKAGE_SET "$package_set" '[$ABI, $PACKAGE_SET, .origin, .name, .version] | @tsv' from ${PACKAGE_FILE} into packagesite.tsv
-$JQ -rc --arg ABI "$abi" --arg PACKAGE_SET "$package_set" '[$ABI, $PACKAGE_SET, .origin, .name, .version] | @tsv' < ${PACKAGE_FILE} > packagesite.tsv
+$JQ -rc --arg ABI "$abi" --arg PACKAGE_SET "$package_set" '.packages[] | [$ABI, $PACKAGE_SET, .origin, .name, .version] | @tsv' < ${PACKAGE_FILE} > packagesite.tsv
 if [ $? -ne 0 ]
 then
   $LOGGER -t $LOGGERTAG "FATAL error: unable to run jq to get the tsv file - $0 terminating"
