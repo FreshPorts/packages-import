@@ -62,7 +62,7 @@ then
 fi
 
 # specifying the full path name to this script so it shows up better in the logs of that script
-$LOGGER -t $LOGGERTA $SCRIPTDIR/import-via-copy-packagesite-all-raw-fields.py -i $WORKDIR/packagesite.tsv
+$LOGGER -t $LOGGERTAG $SCRIPTDIR/import-via-copy-packagesite-all-raw-fields.py -i $WORKDIR/packagesite.tsv
 $SCRIPTDIR/import-via-copy-packagesite-all-raw-fields.py -i $WORKDIR/packagesite.tsv
 if [ $? -ne 0 ]
 then
