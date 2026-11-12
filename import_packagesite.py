@@ -12,9 +12,23 @@ import syslog       # for logging
 from pathlib import Path  # for touching the signal file
 
 import os
+import subprocess
 import sys
 
 from pprint import pprint
+
+
+def run_and_check(command):
+  """Run command; log, and return True, only if it exits 0."""
+  syslog.syslog(syslog.LOG_NOTICE, 'command is: ' + command)
+  result = subprocess.run([command], capture_output=True, text=True)
+  if result.returncode != 0:
+    # the end of its stderr is usually where it says why
+    error = ' '.join((result.stderr or '').strip().splitlines()[-3:])
+    syslog.syslog(syslog.LOG_CRIT, f'{command} failed with exit status {result.returncode}: {error}')
+    return False
+  syslog.syslog(syslog.LOG_NOTICE, 'done running ' + os.path.basename(command))
+  return True
 
 syslog.openlog(ident=os.path.basename(__file__), facility=syslog.LOG_LOCAL3)
 syslog.syslog(syslog.LOG_NOTICE, 'Starting up')
@@ -28,8 +42,21 @@ DSN = 'host=' + config['database']['HOST'] + ' dbname=' + config['database']['DB
 
 PKG_SITE_DIR = config['filesystem']['PACKAGE_IMPORT_DIR']
 
-# the flag we will remove
+# set by check_repos_for_new_stuff.py; job-waiting.pl runs us when it sees it
 SIGNAL_NEW_REPO_READY_FOR_IMPORT = config['filesystem']['SIGNAL_NEW_REPO_READY_FOR_IMPORT']
+
+#
+# Remove the flag first, not last.
+#
+# Removed last, a crash anywhere in between (a database restart, a bad
+# package file) left it in place, and job-waiting.pl ran the whole import
+# again, fetching every ABI each time, until someone removed it by hand.
+# And a flag raised by check_repos_for_new_stuff.py while an import was
+# running was removed at the end without that new repo being imported.
+#
+# missing_ok: running this by hand with no flag is fine.
+#
+Path(SIGNAL_NEW_REPO_READY_FOR_IMPORT).unlink(missing_ok=True)
 
 dbh = psycopg2.connect(DSN)
 curs = dbh.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -76,16 +103,17 @@ if (NumRows > 0):
       # re https://github.com/FreshPorts/freshports/issues/590
       #
 
-      command = SCRIPT_DIR + '/UpdatePackagesFromRawPackages.py'
-      syslog.syslog(syslog.LOG_NOTICE, "command is: " + command);
-      result = os.popen(command).readlines()
-
-      syslog.syslog(syslog.LOG_NOTICE, "done running UpdatePackagesFromRawPackages.py");
-
-      command = SCRIPT_DIR + '/report-notification-packages.pl'
-      syslog.syslog(syslog.LOG_NOTICE, "command is: " + command);
-      result = os.popen(command).readlines()
-      syslog.syslog(syslog.LOG_NOTICE, 'done running report-notification-packages.pl');
+      #
+      # These used to run through os.popen().readlines(), which throws the
+      # exit status away, so a failure was logged as "done running" and
+      # nobody heard of it.  Check it, and say so at LOG_CRIT.  Without the
+      # packages update there is nothing new to report, so the report is
+      # skipped when the update fails.
+      #
+      if run_and_check(SCRIPT_DIR + '/UpdatePackagesFromRawPackages.py'):
+        run_and_check(SCRIPT_DIR + '/report-notification-packages.pl')
+      else:
+        syslog.syslog(syslog.LOG_CRIT, 'not running report-notification-packages.pl after that failure')
 
     else:
       pprint(result)
@@ -97,8 +125,7 @@ if (NumRows > 0):
 dbh.rollback();
 dbh.close();
 
-# we must always remove this when we finish
-Path(SIGNAL_NEW_REPO_READY_FOR_IMPORT).unlink()
+# the flag was removed at the start; see there
 
 if NumRows > 0:
   # set the flag for job-waiting.pl
