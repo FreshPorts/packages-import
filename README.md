@@ -67,6 +67,23 @@ There are three main scripts:
 * usually invoked via `echo /usr/local/libexec/freshports/UpdatePackagesFromRawPackages.py | sudo su -l freshports`
 * runs in about 40 seconds when importing 15 repos
 
+## packages-delete-missing-repos.py
+
+* deletes the `packages` rows of repos which have gone from pkg.freebsd.org,
+  e.g. FreeBSD:14:armv6 latest (https://github.com/FreshPorts/freshports/issues/449)
+* `check_repos_for_new_stuff.py` gets no date for such a repo; the database
+  records the first such check in `packages_last_checked.missing_since` and
+  clears it when a date comes back
+* invokes `PackagesDeleteForMissingRepos()`, which deletes the packages of repos
+  missing for more than 7 days (`--grace-days`) and records each in
+  `package_imports`; the grace period keeps a single failed fetch from emptying
+  a repo
+* prints one line per repo emptied, for the daily periodic mail, and sends
+  `NOTIFY packages_imported` so the web servers clear their packages caches
+* run daily by `refresh-abi.sh` (ingress-scripts, periodic `daily/330.refresh-abi`)
+* by hand: `echo /usr/local/libexec/freshports/packages-delete-missing-repos.py --dry-run --log-dest stderr | sudo su -l freshports`
+* needs database-schema `updates-2026-11-26-packages-missing-since.ddl`
+
 
 # Older stuff
 
